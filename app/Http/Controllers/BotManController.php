@@ -28,7 +28,7 @@ class BotManController extends Controller
         // Create BotMan instance
         $botman = BotManFactory::create($config);
 
-        $botman->middleware->captured(new PreventDoubleClicks);
+        // $botman->middleware->captured(new PreventDoubleClicks);
 
         $botman->hears('start|/start', function (BotMan $bot) {
             $bot->startConversation(new QuizConversation());
@@ -46,9 +46,9 @@ class BotManController extends Controller
             $bot->startConversation(new PrivacyConversation());
         })->stopsConversation();
 
-        $botman->fallback(function ($bot) {
-            $bot->reply("Sorry, I am just a Laravel quiz bot. Type 'start' or click on '/start to begin. See menu for other commands");
-        });
+        // $botman->fallback(function ($bot) {
+        //     $bot->reply("Sorry, I am just a Laravel quiz bot. Type 'start' or click on '/start to begin. See menu for other commands");
+        // });
 
         $botman->listen();
     }
