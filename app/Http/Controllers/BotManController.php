@@ -17,9 +17,12 @@ class BotManController extends Controller
      */
     public function handle()
     {
+        
+        DriverManager::loadDriver(\BotMan\Drivers\Telegram\TelegramDriver::class);
+        DriverManager::loadDriver(\BotMan\Drivers\Web\WebDriver::class);
+
         $botman = app('botman');
 
-        // DriverManager::loadDriver(\BotMan\Drivers\Telegram\TelegramDriver::class);
         // $config = [
         // 'telegram' => [
         //     'token' => config('botman.telegram.token'),
