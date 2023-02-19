@@ -17,25 +17,18 @@ class BotManController extends Controller
      */
     public function handle()
     {
-        
+
         DriverManager::loadDriver(\BotMan\Drivers\Telegram\TelegramDriver::class);
-        DriverManager::loadDriver(\BotMan\Drivers\Web\WebDriver::class);
+        $config = [
+            'telegram' => [
+                'token' => config('botman.telegram.token'),
+            ]
+        ];
 
-        $botman = app('botman');
+        // Create BotMan instance
+        $botman = BotManFactory::create($config);
 
-        // $config = [
-        // 'telegram' => [
-        //     'token' => config('botman.telegram.token'),
-        // ]
-        // ];
-        // // Create BotMan instance
-        // $botman = BotManFactory::create($config);
-
-        // $botman->middleware->captured(new PreventDoubleClicks);
-
-        // $botman->hears('start', function (BotMan $bot) {
-        //     $bot->startConversation(new QuizConversation());
-        // });
+        $botman->middleware->captured(new PreventDoubleClicks);
 
         $botman->hears('start|/start', function (BotMan $bot) {
             $bot->startConversation(new QuizConversation());
