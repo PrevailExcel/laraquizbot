@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        Track::truncate();
         $this->addTracks();
 
         $tracks = Track::all();
