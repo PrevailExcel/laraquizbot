@@ -47,18 +47,12 @@ class QuizConversation extends Conversation
     private function selectTrack()
     {
         $this->say(
-            "We have " . collect($this->quizTracks)->count() . " tracks. \n You have to choose one to continue.",
+            "We have " . $this->quizTracks->count() . " tracks. \n You have to choose one to continue.",
             ['parse_mode' => 'Markdown']
         );
         $this->bot->typesAndWaits(1);
 
-        $trackQuestion = BotManQuestion::create("➡️  *Please Select your track");
-        foreach ($this->quizTracks as $track) {
-            $trackQuestion->addButton(Button::create($track->name)
-                ->value($track->id));
-        }
-
-        $this->ask($trackQuestion, function (BotManAnswer $answer) {
+        return $this->ask($this->chooseTrack(), function (BotManAnswer $answer) {
             $selectedTrack = Track::find($answer->getValue());
 
             if (!$selectedTrack) {
@@ -66,7 +60,6 @@ class QuizConversation extends Conversation
                 return $this->selectTrack();
             }
 
-            $this->bot->typesAndWaits(1);
             return $this->setTrackQuestions($selectedTrack);
         }, [
             'parse_mode' => 'Markdown'
@@ -84,7 +77,7 @@ class QuizConversation extends Conversation
             'parse_mode' => 'Markdown',
         ]);
 
-        $this->bot->typesAndWaits(2);
+        $this->bot->typesAndWaits(1);
 
         return $this->checkForNextQuestion();
     }
@@ -100,7 +93,6 @@ class QuizConversation extends Conversation
 
     private function setTrackQuestions(Track $track)
     {
-
         $this->quizQuestions = $track->questions->shuffle()
             ->take(20);
         $this->questionCount = $this->quizQuestions->count();
@@ -137,7 +129,6 @@ class QuizConversation extends Conversation
             $this->say("*Your answer:* {$quizAnswer->text} {$answerResult}", [
                 'parse_mode' => 'Markdown'
             ]);
-            $this->bot->typesAndWaits(1);
             $this->checkForNextQuestion();
         }, [
             'parse_mode' => 'Markdown'
@@ -218,15 +209,25 @@ class QuizConversation extends Conversation
         });
     }
 
+    private function chooseTrack()
+    {
+        $questionTemplate = BotManQuestion::create("➡️ Please choose a track");
+
+        foreach ($this->quizTracks->shuffle() as $answer) {
+            $questionTemplate->addButton(Button::create($answer->name)
+                ->value($answer->id));
+        }
+        return $questionTemplate;
+    }
+
     private function createQuestionTemplate(Question $question)
     {
         $questionTemplate = BotManQuestion::create("➡️ *Question {$this->currentQuestion} / {$this->questionCount}* \n{$question->text}");
 
         foreach ($question->answers->shuffle() as $answer) {
             $questionTemplate->addButton(Button::create($answer->text)
-                ->value($answer->id));
+                ->value($answer->id)->additionalParameters(['parse_mode' => 'Markdown']));
         }
-
         return $questionTemplate;
     }
 }

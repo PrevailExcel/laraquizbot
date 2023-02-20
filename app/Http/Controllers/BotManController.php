@@ -8,6 +8,7 @@ use App\Conversations\PrivacyConversation;
 use App\Conversations\HighscoreConversation;
 use App\Http\Middleware\PreventDoubleClicks;
 use BotMan\BotMan\BotManFactory;
+use BotMan\BotMan\Cache\LaravelCache;
 use BotMan\BotMan\Drivers\DriverManager;
 
 class BotManController extends Controller
@@ -17,18 +18,32 @@ class BotManController extends Controller
      */
     public function handle()
     {
-
         DriverManager::loadDriver(\BotMan\Drivers\Telegram\TelegramDriver::class);
+
+        // $botman = app('botman');
+
+        // $config = [
+        // 'telegram' => [
+        //     'token' => config('botman.telegram.token'),
+        // ]
+        // ];
         $config = [
-            'telegram' => [
-                'token' => config('botman.telegram.token'),
+            'user_cache_time' => 720,
+
+            'config' => [
+                'conversation_cache_time' => 720,
+            ],
+
+            // Your driver-specific configuration
+            "telegram" => [
+                "token" => env('TELEGRAM_TOKEN'),
             ]
         ];
 
-        // Create BotMan instance
-        $botman = BotManFactory::create($config);
+        // // Create BotMan instance
+        $botman = BotManFactory::create($config, new LaravelCache());
 
-        // $botman->middleware->captured(new PreventDoubleClicks);
+        $botman->middleware->captured(new PreventDoubleClicks);
 
         $botman->hears('start|/start', function (BotMan $bot) {
             $bot->startConversation(new QuizConversation());
